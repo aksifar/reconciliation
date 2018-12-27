@@ -1,5 +1,7 @@
 package com.prudential.datalake.reconciliation.controller;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,36 +14,53 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.prudential.datalake.reconciliation.exception.DocumentNotFoundException;
+import com.prudential.datalake.reconciliation.exception.ConstraintsViolationException;
+import com.prudential.datalake.reconciliation.exception.NoDocumentsFoundException;
 import com.prudential.datalake.reconciliation.model.transformed.Customer;
-import com.prudential.datalake.reconciliation.repository.TransformedCustomerRepository;
+import com.prudential.datalake.reconciliation.repository.CustomerRepository;
+import com.prudential.datalake.reconciliation.service.TransformedCustomerService;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/transformed")
+@RequestMapping("/transformed-customers")
 public class TransformedCustomerController {
 
 	@Autowired
-	TransformedCustomerRepository tCustomerRepository;
+	TransformedCustomerService tCustomerService;
 	
-	@GetMapping
-	public ResponseEntity<Object> getTransformedCustomers() throws DocumentNotFoundException
+	@Autowired
+	CustomerRepository customerRepository;
+	
+	/*@GetMapping
+	public ResponseEntity<List<Customer>> getTransformedCustomers() throws NoDocumentsFoundException
 	{
-		ResponseEntity<Object> response;
-		Iterable<Customer> tCustomer = tCustomerRepository.findAll();
-		if(null != tCustomer)
-			response = new ResponseEntity<>(tCustomer, HttpStatus.OK);
+		ResponseEntity<List<Customer>> response;
+		List<Customer> tCustomerList = tCustomerRepository.getAllTransformedCustomers();
+		if(null != tCustomerList && !tCustomerList.isEmpty())
+			response = new ResponseEntity<List<Customer>>(tCustomerList, HttpStatus.OK);
 		else
 //			response =  new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			throw new DocumentNotFoundException("No Transformed Customer exists in the bucket");
+			throw new NoDocumentsFoundException("No Transformed Customer exists in the bucket");
+		return response;
+	}*/
+	
+	@GetMapping
+	public ResponseEntity<Object> getTransformedCustomers() throws NoDocumentsFoundException
+	{
+		ResponseEntity<Object> response;
+		List<Customer> list = customerRepository.findAll();
+		if(null != list && !list.isEmpty())
+			response =	new ResponseEntity<Object>(list, HttpStatus.OK);
+		else
+			throw new NoDocumentsFoundException("No Transformed Customer exists in the bucket");
 		return response;
 	}
 	
 	@PostMapping
-	public ResponseEntity<Object> createPerson(@Valid @RequestBody Customer transformedCustomer)
+	public ResponseEntity<Object> createTransformedCustomer(@Valid @RequestBody Customer transformedCustomer) throws ConstraintsViolationException
 	{
 		ResponseEntity<Object> response;
-		Customer tCustomer = tCustomerRepository.save(transformedCustomer);
+		Customer tCustomer = tCustomerService.save(transformedCustomer);
 		response = new ResponseEntity<>(tCustomer, HttpStatus.OK);
 		return response;
 	}
