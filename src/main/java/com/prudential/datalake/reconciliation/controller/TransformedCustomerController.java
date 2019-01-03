@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.prudential.datalake.reconciliation.exception.ConstraintsViolationException;
 import com.prudential.datalake.reconciliation.exception.NoDocumentsFoundException;
 import com.prudential.datalake.reconciliation.model.transformed.Customer;
-import com.prudential.datalake.reconciliation.repository.CustomerRepository;
 import com.prudential.datalake.reconciliation.service.TransformedCustomerService;
 
 @RestController
@@ -28,31 +28,27 @@ public class TransformedCustomerController {
 	@Autowired
 	TransformedCustomerService tCustomerService;
 	
-	@Autowired
-	CustomerRepository customerRepository;
-	
-	/*@GetMapping
+	@GetMapping
 	public ResponseEntity<List<Customer>> getTransformedCustomers() throws NoDocumentsFoundException
 	{
 		ResponseEntity<List<Customer>> response;
-		List<Customer> tCustomerList = tCustomerRepository.getAllTransformedCustomers();
+		List<Customer> tCustomerList = tCustomerService.getAllTransformedCustomers();
 		if(null != tCustomerList && !tCustomerList.isEmpty())
 			response = new ResponseEntity<List<Customer>>(tCustomerList, HttpStatus.OK);
 		else
-//			response =  new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			throw new NoDocumentsFoundException("No Transformed Customer exists in the bucket");
 		return response;
-	}*/
+	}
 	
-	@GetMapping
-	public ResponseEntity<Object> getTransformedCustomers() throws NoDocumentsFoundException
+	@GetMapping("/{customerId}")
+	public ResponseEntity<Object> getTransformedCustomerById(@PathVariable String customerId) throws NoDocumentsFoundException
 	{
 		ResponseEntity<Object> response;
-		List<Customer> list = customerRepository.findAll();
-		if(null != list && !list.isEmpty())
-			response =	new ResponseEntity<Object>(list, HttpStatus.OK);
+		Customer customer = tCustomerService.findCustomer(customerId);
+		if(null != customer )
+			response =	new ResponseEntity<Object>( customer, HttpStatus.OK);
 		else
-			throw new NoDocumentsFoundException("No Transformed Customer exists in the bucket");
+			throw new NoDocumentsFoundException("No Transformed Customer with id: " + customerId + " exists in the bucket");
 		return response;
 	}
 	

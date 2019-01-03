@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.prudential.datalake.reconciliation.exception.ConstraintsViolationException;
+import com.prudential.datalake.reconciliation.exception.NoDocumentsFoundException;
 import com.prudential.datalake.reconciliation.model.transformed.Customer;
 import com.prudential.datalake.reconciliation.repository.TransformedCustomerRepository;
 import com.prudential.datalake.reconciliation.service.TransformedCustomerService;
@@ -20,6 +21,11 @@ public class TransformedCustomerServiceImpl implements TransformedCustomerServic
 	TransformedCustomerRepository tCustomerRepositoty;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(TransformedCustomerServiceImpl.class);
+	
+	@Override
+	public Customer findCustomer(String customerId) throws NoDocumentsFoundException {
+		return findCustomerChecked(customerId);
+	}
 	
 	@Override
 	public List<Customer> getAllTransformedCustomers() {
@@ -40,5 +46,11 @@ public class TransformedCustomerServiceImpl implements TransformedCustomerServic
 	     }
 		return customer;
 	}
+
+	private Customer findCustomerChecked(String customerId) throws NoDocumentsFoundException
+    {
+        return tCustomerRepositoty.findById(customerId)
+            .orElseThrow(() -> new NoDocumentsFoundException("Could not find transformed customer with id: " + customerId));
+    }
 
 }

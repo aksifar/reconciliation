@@ -27,12 +27,12 @@ public class Customer implements Serializable{
 	private String id;
 	private String name;
 	
-	public Customer(){}
+//	public Customer(){}
 	
-	public Customer(String id, String name){
+	/*public Customer(String id, String name){
 		this.id = id;
 		this.name = name;
-	}
+	}*/
 
 	public String getId() {
 		return id;
