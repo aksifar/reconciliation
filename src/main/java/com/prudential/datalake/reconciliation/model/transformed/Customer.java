@@ -7,6 +7,8 @@ import org.springframework.data.couchbase.core.mapping.id.GeneratedValue;
 import org.springframework.data.couchbase.core.mapping.id.GenerationStrategy;
 
 import com.couchbase.client.java.repository.annotation.Id;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document
+@JsonInclude(Include.NON_NULL)
 public class Customer implements Serializable{
 
 	private static final long serialVersionUID = 3141513907585928011L;
@@ -26,27 +29,4 @@ public class Customer implements Serializable{
 	@GeneratedValue(strategy = GenerationStrategy.UNIQUE)
 	private String id;
 	private String name;
-	
-//	public Customer(){}
-	
-	/*public Customer(String id, String name){
-		this.id = id;
-		this.name = name;
-	}*/
-
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 }

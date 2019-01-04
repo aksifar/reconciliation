@@ -1,11 +1,15 @@
 package com.prudential.datalake.reconciliation.service.impl;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.prudential.datalake.reconciliation.exception.ConstraintsViolationException;
@@ -23,15 +27,23 @@ public class TransformedCustomerServiceImpl implements TransformedCustomerServic
 	private static final Logger LOG = LoggerFactory.getLogger(TransformedCustomerServiceImpl.class);
 	
 	@Override
-	public Customer findCustomer(String customerId) throws NoDocumentsFoundException {
+	public Customer findOne(String customerId) throws NoDocumentsFoundException {
 		return findCustomerChecked(customerId);
 	}
 	
 	@Override
-	public List<Customer> getAllTransformedCustomers() {
-		return tCustomerRepositoty.findAll();
+	public List<Customer> findAll() {
+		Iterator<Customer> iterator = tCustomerRepositoty.findAll().iterator();
+		List<Customer> customers = new ArrayList<>();  
+		iterator.forEachRemaining(customers::add);
+		return customers;
 	}
 
+	@Override
+	public Page<Customer> findAll(Pageable pageRequest) {
+		return tCustomerRepositoty.findAll(pageRequest);
+	}
+	
 	@Override
 	public Customer save(Customer tCustomer) throws ConstraintsViolationException {
 		Customer customer = null;
@@ -52,5 +64,4 @@ public class TransformedCustomerServiceImpl implements TransformedCustomerServic
         return tCustomerRepositoty.findById(customerId)
             .orElseThrow(() -> new NoDocumentsFoundException("Could not find transformed customer with id: " + customerId));
     }
-
 }
