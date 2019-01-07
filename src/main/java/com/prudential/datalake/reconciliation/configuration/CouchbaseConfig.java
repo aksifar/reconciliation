@@ -12,7 +12,7 @@ import org.springframework.data.couchbase.repository.config.EnableCouchbaseRepos
 import org.springframework.data.couchbase.repository.config.RepositoryOperationsMapping;
 
 import com.couchbase.client.java.Bucket;
-import com.prudential.datalake.reconciliation.model.User;
+import com.prudential.datalake.reconciliation.model.transformed.Customer;
 
 @Configuration
 @EnableCouchbaseRepositories(basePackages={"com.prudential.datalake.reconciliation.repository"})
@@ -41,23 +41,23 @@ public class CouchbaseConfig extends AbstractCouchbaseConfiguration {
 
 	@Override
 	protected String getBucketName() {
-		return transformedBucketName;
+		return rawBucketName;
 	}
 
 	@Override
 	protected String getBucketPassword() {
-		return transformedBucketPassword;
+		return rawBucketPassword;
 	}
 
 	@Bean
-	public Bucket rawBucket() throws Exception {
-		return couchbaseCluster().openBucket(rawBucketName, rawBucketPassword);
+	public Bucket transformedBucket() throws Exception {
+		return couchbaseCluster().openBucket(transformedBucketName, transformedBucketPassword);
 	}
 
 	@Bean
-	public CouchbaseTemplate rawTemplate() throws Exception {
+	public CouchbaseTemplate transformedTemplate() throws Exception {
 		CouchbaseTemplate template = new CouchbaseTemplate(couchbaseClusterInfo(), // reuse the default bean
-				rawBucket(), // the bucket is non-default
+				transformedBucket(), // the bucket is non-default
 				mappingCouchbaseConverter(), translationService() // default beans here as well
 		);
 		template.setDefaultConsistency(getDefaultConsistency());
@@ -70,7 +70,7 @@ public class CouchbaseConfig extends AbstractCouchbaseConfiguration {
 		try
 		{
 			baseMapping // this is already using couchbaseTemplate as default
-			.mapEntity(User.class, rawTemplate()); // every repository dealing with User will be backed by userTemplate()
+			.mapEntity(Customer.class, transformedTemplate()); // every repository dealing with User will be backed by userTemplate()
 		}
 		catch (Exception e) 
 		{   //TODO:  log this
