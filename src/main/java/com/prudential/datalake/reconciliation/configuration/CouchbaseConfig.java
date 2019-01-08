@@ -10,6 +10,7 @@ import org.springframework.data.couchbase.config.AbstractCouchbaseConfiguration;
 import org.springframework.data.couchbase.core.CouchbaseTemplate;
 import org.springframework.data.couchbase.repository.config.EnableCouchbaseRepositories;
 import org.springframework.data.couchbase.repository.config.RepositoryOperationsMapping;
+import org.springframework.data.couchbase.repository.support.IndexManager;
 
 import com.couchbase.client.java.Bucket;
 import com.prudential.datalake.reconciliation.model.transformed.Customer;
@@ -76,5 +77,10 @@ public class CouchbaseConfig extends AbstractCouchbaseConfiguration {
 		{   //TODO:  log this
 			e.printStackTrace();
 		} 
+	}
+	
+	@Override
+	public IndexManager indexManager() {
+	return new IndexManager(true, false, false);
 	}
 }
