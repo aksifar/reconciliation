@@ -32,16 +32,7 @@ public class CustomerController {
 	@Autowired RawCustomerService rawCustomerService;
 	@Autowired TransformedCustomerRepository tr;
 	
-	@GetMapping("/{customerId}")
-	public ResponseEntity<CustomerDTO> getCustomerDetailsFromAllBuckets(@PathVariable String customerId) throws NoDocumentsFoundException
-	{
-		CustomerDTO customerDTO = rawCustomerService.findAllById(customerId);
-		customerDTO.setCustomer(tCustomerService.findOne("PRU::"+customerId));
-		customerDTO.setId(customerId);
-		return new ResponseEntity<CustomerDTO>(customerDTO,HttpStatus.OK);
-	}
-	
-	/**Return Customers from Raw + Transformed bucket
+	/**Returns paginated list of all Customers from Raw + Transformed bucket
 	 * @param pageNumber
 	 * @param pageSize
 	 * @param sortDirection
@@ -50,7 +41,7 @@ public class CustomerController {
 	 * @throws NoDocumentsFoundException
 	 */
 	@GetMapping
-	public ResponseEntity<Page<CustomerDTO>> getAllCustomerByPage(
+	public ResponseEntity<Page<CustomerDTO>> getAllCustomers(
 			@RequestParam(value = "page", defaultValue = "0", required = false) int pageNumber,
 			@RequestParam(value = "size", defaultValue = "5", required = false) int pageSize,
 			@RequestParam(value="sortDirection", defaultValue="desc",required=false) String sortDirection,
@@ -72,12 +63,13 @@ public class CustomerController {
 	}
 	
 	@GetMapping("/{customerId}")
-	public ResponseEntity<Object> getTransformedCustomerById(@PathVariable String customerId) throws NoDocumentsFoundException
+	public ResponseEntity<CustomerDTO> getTransformedCustomerById(@PathVariable String customerId) throws NoDocumentsFoundException
 	{
-		ResponseEntity<Object> response;
-		Customer customer = tCustomerService.findOne(customerId);
-		if(null != customer )
-			response =	new ResponseEntity<Object>( customer, HttpStatus.OK);
+		ResponseEntity<CustomerDTO> response;
+		Customer customer = tCustomerService.findOne(CustomerConstants.PREFIX_CUSTOMER_ID + customerId);
+		CustomerDTO customerDTO = makeCustomerDTO(customer);
+		if(null != customerDTO )
+			response =	new ResponseEntity<CustomerDTO>( customerDTO, HttpStatus.OK);
 		else
 			throw new NoDocumentsFoundException("No Transformed Customer with id: " + customerId + " exists in the bucket");
 		return response;
